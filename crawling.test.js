@@ -1,5 +1,7 @@
-const { normalizeURL, geturlfromhtml } = require('./crawling.js')
+const { normalizeURL, geturlfromhtml, sort_pages } = require('./crawling.js')
 const { test, expect } = require('@jest/globals')
+
+
 
 
 test('normalizeURL strip protocol', () =>{
@@ -96,3 +98,26 @@ test('geturlfromhtml invalidurls', () =>{
     const expected_output = []
     expect(actual_output).toEqual(expected_output)
 })
+
+
+
+
+test('sortpages', () => {
+    const input = {
+      "https://www.google.com/path1": 5,
+      "https://www.google.com": 1,
+      "https://www.google.com/path2": 3,
+      "https://www.google.com/path4": 10,
+      "https://www.google.com/path5": 7 
+    }
+    const actual = sort_pages(input)
+    const expected = [
+      [ "https://www.google.com/path4", 10 ],
+      [ "https://www.google.com/path5", 7 ],
+      [ "https://www.google.com/path1", 5 ],
+      [ "https://www.google.com/path2", 3 ],
+      [ "https://www.google.com", 1 ]
+    ]
+    expect(actual).toEqual(expected)
+  })
+  

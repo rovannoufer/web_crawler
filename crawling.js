@@ -3,8 +3,7 @@ const { JSDOM } = require('jsdom')
 
 
 async function crawl(baseurl, current_url, pages){
-    
-     
+
     const baseurl_obj = new URL(baseurl)
     const current_url_obj = new URL(current_url)
     if(baseurl_obj.hostname !== current_url_obj.hostname){
@@ -92,8 +91,41 @@ function normalizeURL(url_string){
 }
 
 
+function print_report(pages){
+    console.log('==========')
+    console.log('START - REPORT')
+    console.log('==========')
+    const sort_pages1 = sort_pages(pages)
+    for (const sorted_page of sort_pages1){
+      const url = sorted_page[0]
+      const count = sorted_page[1]
+      console.log(`Found ${count} internal links to ${url}`)
+    }
+
+    console.log('==========')
+    console.log('END - REPORT')
+    console.log('==========')
+  }
+  
+  // sortPages sorts a dictionary of pages
+  // into a list of tuples (url, count)
+  // with the highest counts first in the list
+  function sort_pages(pages){
+    // 2D array where the
+    // inner array: [ url, count ]
+    const pagesArr = Object.entries(pages)
+    pagesArr.sort((a, b) => {
+      return b[1] - a[1]
+    })
+    return pagesArr
+  }
+  
+ 
+
 module.exports = {
     normalizeURL,
     geturlfromhtml,
-    crawl
+    crawl,
+    sort_pages,
+    print_report
 }
