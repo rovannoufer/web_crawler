@@ -2,24 +2,49 @@ const { contentType } = require('express/lib/response')
 const { JSDOM } = require('jsdom')
 
 
-async function crawl(current_url){
+async function crawl(baseurl, current_url, pages){
+    
+     
+    const baseurl_obj = new URL(baseurl)
+    const current_url_obj = new URL(current_url)
+    if(baseurl_obj.hostname !== current_url_obj.hostname){
+        return pages
+    }
+
+    const normalized_current_url = normalizeURL(current_url)
+    if(pages[normalized_current_url] > 0){
+        pages[normalized_current_url]++
+        return pages
+    }
+
+    pages[normalized_current_url] = 1
+
+
     console.log(`Actively crawl ${current_url}`)
     try{
         const resp = await fetch(current_url)
         if(resp.status > 399){
             console.log(`Error in fetching with status code : ${resp.status} on page : ${current_url}`)
-            return 
+            return pages
         }
 
         const contenttype = resp.headers.get("content-type")
         if(!contenttype.includes("text/html")){
             console.log(`Non HTML response content type: ${contenttype} on page : ${current_url}`)
-            return 
+            return pages
         }
-        console.log(await resp.text())
+       const html_body = await resp.text()
+
+       const next_urls = geturlfromhtml(html_body,baseurl) 
+
+       for(const next_url of next_urls){
+         pages = await crawl(baseurl, next_url, pages)
+       }
+
     }catch(err){
         console.log(`Error in fetching : ${err.message}, on page: ${current_url}`)
     }
+    return pages
 }
 
 function geturlfromhtml(html_body, base_url){
