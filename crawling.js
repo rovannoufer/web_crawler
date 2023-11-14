@@ -1,7 +1,26 @@
+const { contentType } = require('express/lib/response')
 const { JSDOM } = require('jsdom')
 
 
+async function crawl(current_url){
+    console.log(`Actively crawl ${current_url}`)
+    try{
+        const resp = await fetch(current_url)
+        if(resp.status > 399){
+            console.log(`Error in fetching with status code : ${resp.status} on page : ${current_url}`)
+            return 
+        }
 
+        const contenttype = resp.headers.get("content-type")
+        if(!contenttype.includes("text/html")){
+            console.log(`Non HTML response content type: ${contenttype} on page : ${current_url}`)
+            return 
+        }
+        console.log(await resp.text())
+    }catch(err){
+        console.log(`Error in fetching : ${err.message}, on page: ${current_url}`)
+    }
+}
 
 function geturlfromhtml(html_body, base_url){
     const urls = []
@@ -50,5 +69,6 @@ function normalizeURL(url_string){
 
 module.exports = {
     normalizeURL,
-    geturlfromhtml
+    geturlfromhtml,
+    crawl
 }
